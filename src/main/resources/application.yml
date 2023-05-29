@@ -1,3 +1,7 @@
 server:
   port: 8090
 
+spring:
+  batch:
+    job:
+      names: ${job.name:NONE}
