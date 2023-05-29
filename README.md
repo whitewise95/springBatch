@@ -1,124 +1,18 @@
-# 2.step-job-create
+# 3. 스크립트 실행
 
-## 1. @EnableBatchProcessing 
-> Application에 @EnableBatchProcessing를 추가해 배치를 사용할 수 있도록 한다.
-```java
-@SpringBootApplication
-@EnableBatchProcessing
-public class SpringBatchApplication {
+## 1. 스크립트 찾기
+> control + n 으로 파일을 찾을 수 있는 모두 탭에서 schema를 치면 아래와 같이 나온다. 아무 파일이 나 들어간다.
+![img_1.png](img_1.png)
 
-	public static void main(String[] args) {
-		SpringApplication.run(SpringBatchApplication.class, args);
-	}
+<br>
+<br>  
 
-}
-```
 ---
 
-<br>
-<br>  
-
-
-##  2. job, step 생성
-
-### 2-1. 클래스 생성
->  HelloConfiguration 클래스 생성
-```java
-@Configuration
-@Slf4j
-public class HelloConfiguration {
-	
-}
-```
-
-<br>
-<br>  
-
-
-### 2-2. step 생성
-> 스텝을 생성한다. 
-```java
-@Configuration
-@Slf4j
-public class HelloConfiguration {
-
-	private final StepBuilderFactory stepBuilderFactory;
-
-	public HelloConfiguration( StepBuilderFactory stepBuilderFactory) {
-		this.stepBuilderFactory = stepBuilderFactory;
-	}
-
-	@Bean
-	public Step helloStep() {
-		return stepBuilderFactory.get("helloStep")
-								 .tasklet((contribution, chunkContext) -> {
-									 log.info("hello spring batch");
-									 return RepeatStatus.FINISHED;
-								 }).build();
-	}
-}
-```
-
-<br>
-<br>  
-
-
-### 2-3. job 생성
-```java
-@Configuration
-@Slf4j
-public class HelloConfiguration {
-
-	private final JobBuilderFactory jobBuilderFactory;
-	private final StepBuilderFactory stepBuilderFactory;
-
-	public HelloConfiguration(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory) {
-		this.jobBuilderFactory = jobBuilderFactory;
-		this.stepBuilderFactory = stepBuilderFactory;
-	}
-
-	@Bean
-	public Job helloJob() {
-		return jobBuilderFactory.get("hellojob")
-								.incrementer(new RunIdIncrementer())
-								.start(helloStep())
-								.build();
-	}
-
-	@Bean
-	public Step helloStep() {
-		return stepBuilderFactory.get("helloStep")
-								 .tasklet((contribution, chunkContext) -> {
-									 log.info("hello spring batch");
-									 return RepeatStatus.FINISHED;
-								 }).build();
-	}
-}
-```
----
-
-<br>
-<br>  
-
-## yml 설정
-> job이 많아서 한번 실행되는 것을 막기 위해서는 아래와 같이 설정할 수 있다. --job.name={jobName}
-```java
-@Bean
-public Job helloJob() {
-    return jobBuilderFactory.get("hellojob")  // hellojob이게 jobName 이다.
-                            .incrementer(new RunIdIncrementer())
-                            .start(helloStep())
-                            .build();
-}
-```  
-
-```yaml
-spring:
-  batch:
-    job:
-      names: ${job.name:NONE}
-```
-![img.png](img.png)
+## 2. 경로찾기
+> 해당 파일에 들어가서 alt + F1 클릭하고 1를 누르면 해당파일의 경로까지 이동되는데
+> 그 파일들 중에 자신의 DB와 맞는 스크립트 문을 실행하면된다. 실행 방법은 하나의 스크립트문에서 alt + enter를 하면된다.
+![img_2.png](img_2.png)
 
 
 
