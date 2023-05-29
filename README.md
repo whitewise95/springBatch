@@ -1,68 +1,126 @@
-# 1-1 프로젝트 환경설정
+# 2.step-job-create
 
-##버전
-- java 11
-- spring boot 2.7.5
-- gradle 7.6.1
-- MySQL 8.0   
+## 1. @EnableBatchProcessing 
+> Application에 @EnableBatchProcessing를 추가해 배치를 사용할 수 있도록 한다.
+```java
+@SpringBootApplication
+@EnableBatchProcessing
+public class SpringBatchApplication {
 
+	public static void main(String[] args) {
+		SpringApplication.run(SpringBatchApplication.class, args);
+	}
 
+}
+```
 ---
 
-## 기술 스택
-- JAVA SpringBoot
-- JPA (Spring Data JPA)
-- MySQL
-- Spring Batch
+<br>
+<br>  
 
 
+##  2. job, step 생성
 
+### 2-1. 클래스 생성
+>  HelloConfiguration 클래스 생성
+```java
+@Configuration
+@Slf4j
+public class HelloConfiguration {
+	
+}
+```
+
+<br>
+<br>  
+
+
+### 2-2. step 생성
+> 스텝을 생성한다. 
+```java
+@Configuration
+@Slf4j
+public class HelloConfiguration {
+
+	private final StepBuilderFactory stepBuilderFactory;
+
+	public HelloConfiguration( StepBuilderFactory stepBuilderFactory) {
+		this.stepBuilderFactory = stepBuilderFactory;
+	}
+
+	@Bean
+	public Step helloStep() {
+		return stepBuilderFactory.get("helloStep")
+								 .tasklet((contribution, chunkContext) -> {
+									 log.info("hello spring batch");
+									 return RepeatStatus.FINISHED;
+								 }).build();
+	}
+}
+```
+
+<br>
+<br>  
+
+
+### 2-3. job 생성
+```java
+@Configuration
+@Slf4j
+public class HelloConfiguration {
+
+	private final JobBuilderFactory jobBuilderFactory;
+	private final StepBuilderFactory stepBuilderFactory;
+
+	public HelloConfiguration(JobBuilderFactory jobBuilderFactory, StepBuilderFactory stepBuilderFactory) {
+		this.jobBuilderFactory = jobBuilderFactory;
+		this.stepBuilderFactory = stepBuilderFactory;
+	}
+
+	@Bean
+	public Job helloJob() {
+		return jobBuilderFactory.get("hellojob")
+								.incrementer(new RunIdIncrementer())
+								.start(helloStep())
+								.build();
+	}
+
+	@Bean
+	public Step helloStep() {
+		return stepBuilderFactory.get("helloStep")
+								 .tasklet((contribution, chunkContext) -> {
+									 log.info("hello spring batch");
+									 return RepeatStatus.FINISHED;
+								 }).build();
+	}
+}
+```
 ---
-## 1-1 - 추가된 내용
-- build.gradle
-```gradle
-plugins {
-    id 'java'
-    id 'org.springframework.boot' version '2.7.5'
-    id 'io.spring.dependency-management' version '1.1.0'
-}
 
-group = 'com.example'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+<br>
+<br>  
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    compileOnly 'org.projectlombok:lombok'
-    runtimeOnly 'com.h2database:h2'
-    runtimeOnly 'com.mysql:mysql-connector-j'
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    implementation 'org.springframework.boot:spring-boot-starter-batch'
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
+## yml 설정
+> job이 많아서 한번 실행되는 것을 막기 위해서는 아래와 같이 설정할 수 있다. --job.name={jobName}
+```java
+@Bean
+public Job helloJob() {
+    return jobBuilderFactory.get("hellojob")  // hellojob이게 jobName 이다.
+                            .incrementer(new RunIdIncrementer())
+                            .start(helloStep())
+                            .build();
 }
 ```  
 
----
-- yml
 ```yaml
-server:
-  port: 8090
+spring:
+  batch:
+    job:
+      names: ${job.name:NONE}
 ```
+![img.png](img.png)
+
+
 
 
 
