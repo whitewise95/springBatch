@@ -1,8 +1,8 @@
 # 1-1 프로젝트 환경설정
 
 ##버전
-- java 17
-- spring boot 3.1
+- java 11
+- spring boot 2.7.5
 - gradle 7.6.1
 - MySQL 8.0   
 
@@ -23,13 +23,13 @@
 ```gradle
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.1.0'
+    id 'org.springframework.boot' version '2.7.5'
     id 'io.spring.dependency-management' version '1.1.0'
 }
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+sourceCompatibility = '11'
 
 configurations {
     compileOnly {
@@ -55,7 +55,6 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
-
 ```  
 
 ---
